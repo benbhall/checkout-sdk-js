@@ -34,7 +34,11 @@ export default class PaymentStrategyRegistry extends Registry<
             return PaymentStrategyType.KLARNAV2;
         }
 
-        const methodId = paymentMethod.gateway || paymentMethod.id;
+        // For Google Pay, prioritize method ID over gateway to ensure proper routing
+        // (e.g., googlepaystripeupe should use Stripe UPE, not fall back to Adyen)
+        const methodId = paymentMethod.id?.includes('googlepay')
+            ? paymentMethod.id
+            : paymentMethod.gateway || paymentMethod.id;
 
         if (this._hasFactoryForMethod(methodId)) {
             return methodId;
